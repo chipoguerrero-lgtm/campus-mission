@@ -41,6 +41,7 @@ const EQUIPOS = [
 EQUIPOS.forEach((e,i)=>e.color=COL[i]);
 function preguntas(eq){
   const multi = eq.areas.length>1;
+  if (typeof IDIOMA !== 'undefined' && IDIOMA === 'es') return preguntasES(eq, multi);
   const base = [
     ['c1','Person in charge', multi?'Who is in charge of each area? Full name and position.':'Who is in charge? Full name and position.'],
     ['c2','What it includes','What does it include? Programs, areas, staff or spaces that make it up.'],
@@ -93,3 +94,114 @@ const EXPLICACION = [
   ['consejo','Tip for new students','One practical tip a new student can use tomorrow.',2]
 ];
 const ETIQUETAS = {c1:'Person in charge',c2:'What it includes',c3:'Location',c4:'Services',c5:'Contact',c6:'For new students'};
+
+
+/* ===================== ESPAÑOL SENCILLO (alumnos Sordos) =====================
+   Frases cortas, una idea por frase, palabras comunes. */
+function preguntasES(eq, multi){
+  const base = [
+    ['c1','Responsable', multi?'¿Quién es la persona responsable de cada área? Escribe nombre completo y puesto.':'¿Quién es la persona responsable? Escribe nombre completo y puesto.'],
+    ['c2','Qué hay aquí','¿Qué hay en este lugar? Escribe carreras, áreas, personas o espacios.'],
+    ['c3','Ubicación','¿Dónde está exactamente? Escribe el piso, el número de salón o una referencia.'],
+    ['c4','Servicios','¿Qué servicios da a los alumnos? ¿Cómo los pides?'],
+    ['c5','Contacto','¿Cuál es el horario? ¿Cuál es el correo, la extensión o la red social?']
+  ];
+  const esp = eq.extra.map((t,i)=>['e'+(i+1),'Pregunta especial',t]);
+  return [...base, ...esp, ['c6','Para alumnos nuevos','Escribe una frase: ¿qué debe saber un alumno nuevo de este lugar?']];
+}
+const TEXTOS_ES = {
+  lugares: {
+    learning:  {nombre:'Learning Center', pista:'Está al oriente de la glorieta. Tiene techo gris con paneles solares.'},
+    edificio1: {nombre:'Edificio 1', pista:'Es el edificio largo con paneles solares. Está frente al estacionamiento principal.'},
+    almacen:   {nombre:'Almacén y cabaña de Sustentabilidad', pista:'Son dos construcciones pequeñas. Están al oriente, junto a la carpa blanca.'},
+    edificio2: {nombre:'Edificio 2', pista:'Es la nave grande de techo blanco. Está al norte, junto al estacionamiento de tierra.'},
+    metra:     {nombre:'Metra Center', pista:'Está al poniente de la glorieta. Su techo es café y blanco.'},
+    acopio:    {nombre:'Centro de acopio', pista:'Es una construcción pequeña. Está 10 metros detrás del almacén y la cabaña.'},
+    lombricomposta: {nombre:'Lombricomposta', pista:'Está en la orilla oriente del campus, después de la cabaña.'},
+    bebederos: {nombre:'Bebederos de fauna', pista:'Están en la orilla poniente del campus, entre los árboles.'}
+  },
+  equipos: {
+    1:{titulo:'Academia de Ingeniería en Animación y Efectos Visuales', areas:['Academia de Animación y Efectos Visuales'],
+       extra:['¿Qué laboratorios, equipo o programas de computadora usa la carrera?','¿Qué proyectos o eventos de la carrera pueden ver alumnos de otras carreras?']},
+    2:{titulo:'Academia de Desarrollo Humano', areas:['Desarrollo Humano','Inclusión','Cultura y Deportes','Psicopedagogía'],
+       extra:['¿Qué talleres de cultura y equipos de deporte hay? ¿Cómo te inscribes?','¿Qué apoyos da Inclusión a alumnos con discapacidad?','¿Cómo pides una cita en Psicopedagogía? ¿Qué ayuda dan?']},
+    3:{titulo:'Academia de Idiomas', areas:['Academia de Idiomas','Centro Certificador','Cursos externos','Certificaciones'],
+       extra:['¿Qué certificaciones de idioma puedes hacer aquí? ¿Cuánto cuestan?','¿Qué cursos externos hay? ¿Quién puede tomarlos?','¿Qué nivel de inglés necesitas en tu carrera? ¿Cómo lo demuestras?']},
+    4:{titulo:'Academia de Terapia Física', areas:['Academia de Terapia Física','Clínica'],
+       extra:['¿Qué servicios da la clínica? ¿Cuánto cuesta cada uno?','¿Quién puede atenderse ahí? ¿Cómo haces una cita?','¿Quién atiende: alumnos, maestros o los dos?']},
+    5:{titulo:'Administración', areas:['Internacionalización','Vinculación','Oficina de Sustentabilidad','Secretaría Académica'],
+       extra:['¿Qué trámites hace la Secretaría Académica?','¿Qué programas de intercambio hay? ¿Qué piden?','¿Qué hace Vinculación? (estadías, servicio social, bolsa de trabajo)','¿Qué programas tiene la Oficina de Sustentabilidad? ¿Cómo participas?']},
+    6:{titulo:'Sala tiflotécnica, oficina de STEM y área de Cecyteq', areas:['Sala tiflotécnica','Oficina de STEM','Área de Cecyteq'],
+       extra:['¿Qué es la sala tiflotécnica? ¿Qué equipo tiene? ¿A quién apoya?','¿Qué actividades organiza la oficina de STEM?','¿Qué hace el Cecyteq en la universidad?']},
+    7:{titulo:'Almacén, germinación y mariposa monarca', areas:['Almacén','Almacén de herramientas','Área de germinación','Cuidado de la mariposa monarca'],
+       extra:['¿Cómo pides material o herramientas prestadas? ¿Cuáles son las reglas?','¿Qué plantas crecen en el área de germinación? ¿Para qué?','¿Cómo cuidan a la mariposa monarca? ¿Cómo pueden ayudar los alumnos?']},
+    8:{titulo:'Residuos, lombricomposta y bebederos de fauna', areas:['Centro de acopio (residuos)','Lombricomposta (orilla oriente)','Bebederos de fauna (orilla poniente, entre los árboles)'],
+       extra:['¿Qué residuos separan? ¿A dónde va cada uno?','¿Cómo funciona la lombricomposta? ¿Qué se obtiene?','¿Qué animales usan los bebederos? ¿Por qué son necesarios?']},
+    9:{titulo:'Academia de Ingeniería Automotriz', areas:['Laboratorio 1','Laboratorio 2','Laboratorio 3','Laboratorio Tramvet','Área de Investigación Continua'],
+       extra:['¿Qué hacen en los laboratorios 1, 2 y 3? ¿Qué equipo principal tiene cada uno?','¿Qué es el laboratorio Tramvet? ¿Qué proyectos tiene?','¿Qué investiga el Área de Investigación Continua? ¿Cómo puede entrar un alumno?']},
+    10:{titulo:'Academia de ITIID e IRC', areas:['Academia de ITIID','Academia de IRC','Innovation Room','Laboratorios'],
+       extra:['¿Qué carreras tiene la academia de ITIID e IRC?','¿Para qué sirve el Innovation Room? ¿Cómo se aparta?','¿Qué laboratorios hay? ¿Qué hacen en cada uno?']}
+  },
+  explicacion: [
+    ['resumen','Resumen','En 2 o 3 frases: ¿qué es este lugar? ¿Por qué es importante para los alumnos?',4],
+    ['dato1','Dato clave 1','Lo más importante que encontraron.',2],
+    ['dato2','Dato clave 2','Otro dato importante.',2],
+    ['dato3','Dato clave 3','Un dato más.',2],
+    ['curioso','Dato curioso','Algo que les sorprendió.',2],
+    ['consejo','Consejo para alumnos nuevos','Un consejo práctico que un alumno nuevo puede usar mañana.',2]
+  ]
+};
+/* Descripción de cada construcción, para elegir sin ver el mapa (modo baja visión). No dicen el nombre. */
+const DESCRIPCIONES = {
+  en: {
+    'edificio1':'Long building with solar panels, facing the main parking lot.',
+    'edificio2':'Large hall with a white roof, in the north, next to the dirt parking lot.',
+    'almacen':'Two small buildings on the east side, next to the big white tent.',
+    'learning':'Building with a grey roof and solar panels, east of the roundabout.',
+    'metra':'Building with a brown and white roof, west of the roundabout.',
+    'acopio':'Small structure behind the two small buildings on the east side.',
+    'lombricomposta':'Small spot on the east edge of campus.',
+    'bebederos':'Small spot on the west edge of campus, in the tree line.',
+    'x-norte':'Small building at the far north end of campus.',
+    'x-carpa':'Big white tent on the east side.',
+    'x-curvo':'Curved building in the south-west.',
+    'x-caseta':'Very small booth next to the grey-roofed building.',
+    'x-gimnasio':'Large hall at the far south, past the football field.',
+    'x-bodega':'Small booth next to the football field.',
+    'x-acceso':'Guard booth at the entrance roundabout.'
+  },
+  es: {
+    'edificio1':'Edificio largo con paneles solares. Está frente al estacionamiento principal.',
+    'edificio2':'Nave grande de techo blanco. Está al norte, junto al estacionamiento de tierra.',
+    'almacen':'Dos edificios pequeños al oriente. Están junto a la carpa blanca.',
+    'learning':'Edificio de techo gris con paneles solares. Está al oriente de la glorieta.',
+    'metra':'Edificio de techo café y blanco. Está al poniente de la glorieta.',
+    'acopio':'Construcción pequeña detrás de los dos edificios pequeños del oriente.',
+    'lombricomposta':'Lugar pequeño en la orilla oriente del campus.',
+    'bebederos':'Lugar pequeño en la orilla poniente, entre los árboles.',
+    'x-norte':'Edificio pequeño en el extremo norte del campus.',
+    'x-carpa':'Carpa blanca grande al oriente.',
+    'x-curvo':'Edificio curvo al sur poniente.',
+    'x-caseta':'Caseta muy pequeña junto al edificio de techo gris.',
+    'x-gimnasio':'Nave grande al extremo sur, después de la cancha de fútbol.',
+    'x-bodega':'Caseta pequeña junto a la cancha de fútbol.',
+    'x-acceso':'Caseta de vigilancia en la glorieta de la entrada.'
+  }
+};
+/* Guardar el inglés original y cambiar de idioma sin recargar */
+const TEXTOS_EN = {
+  lugares: JSON.parse(JSON.stringify(LUGARES)),
+  equipos: Object.fromEntries(EQUIPOS.map(e => [e.n, {titulo:e.titulo, areas:e.areas.slice(), extra:e.extra.slice()}])),
+  explicacion: EXPLICACION.map(r => r.slice())
+};
+var IDIOMA = 'en';
+function aplicarIdiomaDatos(lang){
+  IDIOMA = lang === 'es' ? 'es' : 'en';
+  const src = IDIOMA === 'es' ? TEXTOS_ES : TEXTOS_EN;
+  Object.keys(src.lugares).forEach(k => { if (LUGARES[k]) Object.assign(LUGARES[k], src.lugares[k]); });
+  EQUIPOS.forEach(e => { const t = src.equipos[e.n]; if (t) { e.titulo = t.titulo; e.areas = t.areas.slice(); e.extra = t.extra.slice(); } });
+  EXPLICACION.length = 0; src.explicacion.forEach(r => EXPLICACION.push(r.slice()));
+  Object.assign(ETIQUETAS, IDIOMA === 'es'
+    ? {c1:'Responsable',c2:'Qué hay aquí',c3:'Ubicación',c4:'Servicios',c5:'Contacto',c6:'Para alumnos nuevos'}
+    : {c1:'Person in charge',c2:'What it includes',c3:'Location',c4:'Services',c5:'Contact',c6:'For new students'});
+}

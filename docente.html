@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Campus Mission · Panel docente</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
-<link rel="stylesheet" href="styles.css?v=2">
+<link rel="stylesheet" href="styles.css?v=3">
 <style>
 .gcard{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;align-items:center;padding:14px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer}
 .gcard.sel{border-color:var(--red);box-shadow:0 3px 0 var(--red)}
@@ -22,6 +22,10 @@
 </head>
 <body>
 <div class="app">
+  <div class="logos">
+    <img src="assets/logo_upsrj.png" alt="Universidad Politécnica de Santa Rosa Jáuregui">
+    <img src="assets/logo_iehl.png" alt="IEHL · Integral Education for Higher Learning">
+  </div>
   <header class="top">
     <div class="brand">
       <svg width="46" height="34" viewBox="0 0 46 34" aria-hidden="true"><rect x="9" y="1" width="10" height="6" rx="1.5" fill="#a81d15"/><rect x="27" y="1" width="10" height="6" rx="1.5" fill="#a81d15"/><rect x="0" y="6" width="46" height="28" rx="3" fill="#c8261d"/><rect x="0" y="27" width="46" height="7" rx="2" fill="#a81d15"/></svg>
@@ -69,11 +73,12 @@
       <div class="doc-grid" id="equipos"><p class="empty">Elige un grupo para ver a sus equipos.</p></div>
     </div>
   </div>
+  <footer class="pie"><span class="save">Campus Mission · UPSRJ · Tutoring for Immersion</span><img class="firma" src="assets/firma_designed_by_chipo.png" alt="Designed and built by Chipo"></footer>
 </div>
 
-<script src="config.js?v=2"></script>
-<script src="api.js?v=2"></script>
-<script src="data.js?v=2"></script>
+<script src="config.js?v=3"></script>
+<script src="api.js?v=3"></script>
+<script src="data.js?v=3"></script>
 <script>
 const API = window.CampusAPI;
 let PIN = null, SEL = null;
