@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Campus Mission · Panel docente</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+.gcard{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;align-items:center;padding:14px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer}
+.gcard.sel{border-color:var(--red);box-shadow:0 3px 0 var(--red)}
+.gcode{font-family:var(--mono);font-size:1.25rem;letter-spacing:.08em}
+.switch{display:flex;align-items:center;gap:8px;font-weight:700;font-size:.9rem}
+.switch input{width:20px;height:20px;accent-color:var(--ok)}
+.big-code{font-family:var(--mono);font-size:clamp(2rem,7vw,4rem);letter-spacing:.1em;padding:16px;border-radius:14px;background:var(--surface-2);border:2px dashed var(--line);text-align:center}
+.cols{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:20px;align-items:start}
+.list{display:flex;flex-direction:column;gap:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+@media (max-width:860px){.cols{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg width="46" height="34" viewBox="0 0 46 34" aria-hidden="true"><rect x="9" y="1" width="10" height="6" rx="1.5" fill="#a81d15"/><rect x="27" y="1" width="10" height="6" rx="1.5" fill="#a81d15"/><rect x="0" y="6" width="46" height="28" rx="3" fill="#c8261d"/><rect x="0" y="27" width="46" height="7" rx="2" fill="#a81d15"/></svg>
+      <div><div class="eyebrow">Campus Mission</div><h1>Panel docente</h1></div>
+    </div>
+    <div class="toolbar">
+      <a class="btn ghost small" id="lnkHoja" target="_blank" rel="noopener" hidden>Abrir hoja de cálculo</a>
+      <a class="btn ghost small" id="lnkCarpeta" target="_blank" rel="noopener" hidden>Carpeta en Drive</a>
+      <button class="btn ghost small" id="btnSalir" hidden>Salir</button>
+    </div>
+  </header>
+  <div class="banner demo" id="demo" hidden>Modo de prueba: no hay servidor configurado. El PIN docente de prueba es 0000 y los datos viven solo en este navegador.</div>
+  <div class="banner" id="aviso" hidden></div>
+
+  <form class="card form" id="fLogin" style="max-width:420px" novalidate>
+    <h2>Entrar</h2>
+    <div class="field"><label for="inPinD">PIN docente</label><input type="password" id="inPinD" autocomplete="current-password" required></div>
+    <p class="msg bad" id="errLogin" hidden></p>
+    <button class="btn" type="submit">Entrar</button>
+  </form>
+
+  <div class="cols" id="vPanel" hidden>
+    <div style="display:flex;flex-direction:column;gap:16px">
+      <form class="card form" id="fGrupo" novalidate>
+        <h2>Nuevo grupo</h2>
+        <div class="field"><label for="inNombre">Nombre del grupo</label><input type="text" id="inNombre" placeholder="IRC 01" required></div>
+        <button class="btn" type="submit">Crear grupo y código</button>
+        <div id="nuevoCodigo" hidden style="display:flex;flex-direction:column;gap:8px">
+          <span class="eyebrow">Código para los alumnos</span>
+          <div class="big-code" id="bigCode"></div>
+          <button class="btn ghost small" type="button" id="btnCopiar">Copiar código</button>
+        </div>
+      </form>
+      <div class="card" style="display:flex;flex-direction:column;gap:12px">
+        <div class="row" style="justify-content:space-between"><h2>Grupos</h2><button class="btn ghost small" id="btnRecargar">Actualizar</button></div>
+        <div class="list" id="grupos"><p class="empty">Cargando…</p></div>
+      </div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:16px">
+      <div class="row" style="justify-content:space-between">
+        <div><div class="eyebrow" id="selCodigo">Elige un grupo</div><h2 id="selNombre">Equipos</h2></div>
+        <label class="switch" id="swFase3" hidden><input type="checkbox" id="chkFase3"> Fase 3 abierta</label>
+      </div>
+      <p class="muted" id="ayudaF3" hidden style="color:var(--muted)">Abre la fase 3 cuando el grupo termine su semana de recolección. Los equipos verán y podrán descargar lo que encontró todo el grupo.</p>
+      <div class="doc-grid" id="equipos"><p class="empty">Elige un grupo para ver a sus equipos.</p></div>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script src="data.js"></script>
+<script>
+const API = window.CampusAPI;
+let PIN = null, SEL = null;
+try { PIN = sessionStorage.getItem('campusMission.pinDocente'); } catch {}
+if (API.DEMO) $('#demo').hidden = false;
+const hora = iso => { try { return iso ? new Date(iso).toLocaleString('es-MX', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : ''; } catch { return ''; } };
+const doc = (op, extra) => API.llamar(Object.assign({ a: 'docente', pinDocente: PIN, op }, extra || {}));
+function aviso(t) { const a = $('#aviso'); a.textContent = t || ''; a.hidden = !t; }
+
+$('#fLogin').addEventListener('submit', async e => { e.preventDefault(); PIN = $('#inPinD').value.trim(); await entrar(); });
+async function entrar() {
+  const r = await doc('grupos');
+  if (!r.ok) { const m = $('#errLogin'); m.textContent = r.error === 'wrong_teacher_pin' ? 'PIN incorrecto. Si no lo has cambiado en Code.gs, cámbialo y vuelve a implementar.' : 'No se pudo conectar (' + r.error + ').'; m.hidden = false; $('#fLogin').hidden = false; $('#vPanel').hidden = true; return; }
+  try { sessionStorage.setItem('campusMission.pinDocente', PIN); } catch {}
+  $('#fLogin').hidden = true; $('#vPanel').hidden = false; $('#btnSalir').hidden = false;
+  if (r.hoja) { $('#lnkHoja').href = r.hoja; $('#lnkHoja').hidden = false; }
+  if (r.carpeta) { $('#lnkCarpeta').href = r.carpeta; $('#lnkCarpeta').hidden = false; }
+  pintarGrupos(r.grupos);
+}
+$('#btnSalir').addEventListener('click', () => { try { sessionStorage.removeItem('campusMission.pinDocente'); } catch {} location.reload(); });
+$('#btnRecargar').addEventListener('click', async () => { const r = await doc('grupos'); if (r.ok) pintarGrupos(r.grupos); if (SEL) verGrupo(SEL); });
+
+function pintarGrupos(gs) {
+  $('#grupos').innerHTML = gs.length ? gs.map(g => `<div class="gcard${SEL === g.codigo ? ' sel' : ''}" data-c="${esc(g.codigo)}" tabindex="0" role="button"><div><b>${esc(g.nombre)}</b><div class="gcode">${esc(g.codigo)}</div></div><div style="text-align:right"><span class="pill ${g.fase3 ? 'ok' : ''}">${g.fase3 ? 'Fase 3 abierta' : 'Fases 1–2'}</span><div class="muted" style="font-size:.85rem;color:var(--muted)">${g.equipos}/10 equipos</div></div></div>`).join('') : '<p class="empty">Aún no hay grupos. Crea el primero arriba.</p>';
+  document.querySelectorAll('.gcard').forEach(el => { const go = () => verGrupo(el.dataset.c); el.addEventListener('click', go); el.addEventListener('keydown', e => { if (e.key === 'Enter') go(); }); });
+}
+
+$('#fGrupo').addEventListener('submit', async e => {
+  e.preventDefault(); const nombre = $('#inNombre').value.trim(); if (!nombre) return;
+  const r = await doc('crearGrupo', { nombre });
+  if (!r.ok) { aviso('No se pudo crear el grupo (' + r.error + ').'); return; }
+  $('#bigCode').textContent = r.codigo; $('#nuevoCodigo').hidden = false; $('#inNombre').value = '';
+  const g = await doc('grupos'); if (g.ok) pintarGrupos(g.grupos);
+});
+$('#btnCopiar').addEventListener('click', async () => { try { await navigator.clipboard.writeText($('#bigCode').textContent); $('#btnCopiar').textContent = 'Copiado'; } catch { $('#btnCopiar').textContent = 'Selecciónalo y cópialo'; } });
+
+async function verGrupo(codigo) {
+  SEL = codigo;
+  document.querySelectorAll('.gcard').forEach(el => el.classList.toggle('sel', el.dataset.c === codigo));
+  $('#equipos').innerHTML = '<p class="empty">Cargando equipos…</p>';
+  const r = await doc('equipos', { codigo });
+  if (!r.ok) { $('#equipos').innerHTML = '<p class="empty">No se pudieron cargar (' + esc(r.error) + ').</p>'; return; }
+  $('#selCodigo').textContent = r.grupo.codigo; $('#selNombre').textContent = r.grupo.nombre;
+  $('#swFase3').hidden = false; $('#ayudaF3').hidden = false; $('#chkFase3').checked = !!r.grupo.fase3;
+  $('#equipos').innerHTML = EQUIPOS.map(eq => {
+    const d = r.equipos.find(x => x.equipo === eq.n);
+    if (!d) return `<div class="doc-card"><div class="row"><div class="badge" style="--c:${eq.color};width:40px;height:40px;font-size:1.1rem">${eq.n}</div><div><b>${esc(eq.titulo)}</b><div class="pills"><span class="pill no">Sin registro</span></div></div></div></div>`;
+    const qs = preguntas(eq); const n = qs.filter(([id]) => (d.respuestas[id] || '').trim().length >= 3).length;
+    const x = d.explicacion || {};
+    return `<div class="doc-card">
+      <div class="row">${d.mini ? `<img src="${esc(d.mini)}" alt="Foto del equipo ${eq.n}">` : `<div class="badge" style="--c:${eq.color};width:64px;height:64px">${eq.n}</div>`}
+        <div style="min-width:0"><b>Equipo ${eq.n} · ${esc(eq.titulo)}</b>
+          <div class="pills" style="margin-top:6px">
+            <span class="pill ${d.ubicado ? 'ok' : 'no'}">${d.ubicado ? 'Ubicado · ' + d.intentos + ' int.' : 'Sin ubicar · ' + d.intentos + ' int.'}</span>
+            <span class="pill ${d.tieneFoto ? 'ok' : 'no'}">${d.tieneFoto ? 'Foto ' + hora(d.fotoEn) : 'Sin foto'}</span>
+            <span class="pill ${n === qs.length ? 'ok' : ''}">F2 ${n}/${qs.length}</span>
+            <span class="pill ${d.explicadoEn ? 'ok' : ''}">${d.explicadoEn ? 'F3 enviada' : 'F3 pendiente'}</span>
+          </div></div></div>
+      ${d.integrantes ? `<p style="font-size:.85rem;color:var(--muted);white-space:pre-wrap;margin:0">${esc(d.integrantes)}</p>` : ''}
+      <details><summary>Respuestas de la fase 2</summary><dl class="ans">${qs.map(([id, , t]) => `<dt>${esc(t)}</dt><dd>${esc(d.respuestas[id] || '—')}</dd>`).join('')}</dl></details>
+      <details><summary>Explicación de la fase 3</summary><dl class="ans">${EXPLICACION.map(([id, tag]) => `<dt>${esc(tag)}</dt><dd>${esc(x[id] || '—')}</dd>`).join('')}</dl></details>
+      <div class="row">${d.fotoUrl ? `<a class="link" href="${esc(d.fotoUrl)}" target="_blank" rel="noopener">Foto completa ↗</a>` : ''}<button class="btn ghost small" data-pin="${eq.n}">Reiniciar PIN</button><span class="save">Última modificación: ${hora(d.actualizado)}</span></div>
+      <div class="row" data-pinbox="${eq.n}" hidden><input type="text" inputmode="numeric" maxlength="4" placeholder="Nuevo PIN" style="max-width:9ch" id="np-${eq.n}"><button class="btn small" data-pinok="${eq.n}">Guardar PIN</button></div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('[data-pin]').forEach(b => b.addEventListener('click', () => { const box = document.querySelector(`[data-pinbox="${b.dataset.pin}"]`); box.hidden = !box.hidden; }));
+  document.querySelectorAll('[data-pinok]').forEach(b => b.addEventListener('click', async () => {
+    const n = b.dataset.pinok, pin = $('#np-' + n).value.trim();
+    if (!/^\d{4}$/.test(pin)) { aviso('El PIN debe tener 4 dígitos.'); return; }
+    const r2 = await doc('reiniciarPin', { codigo: SEL, equipo: +n, pin });
+    aviso(r2.ok ? `PIN del equipo ${n} cambiado. Díselo al equipo.` : 'No se pudo cambiar (' + r2.error + ').');
+  }));
+}
+$('#chkFase3').addEventListener('change', async e => {
+  const abierta = e.target.checked;
+  const r = await doc('fase3', { codigo: SEL, abierta });
+  if (!r.ok) { e.target.checked = !abierta; aviso('No se pudo cambiar (' + r.error + ').'); return; }
+  aviso(abierta ? 'Fase 3 abierta para este grupo.' : 'Fase 3 cerrada para este grupo.');
+  const g = await doc('grupos'); if (g.ok) pintarGrupos(g.grupos);
+});
+if (PIN) entrar();
+</script>
+</body>
+</html>

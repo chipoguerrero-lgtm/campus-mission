@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Campus Mission · UPSRJ</title>
+<meta name="description" content="Campus Mission: find your place on campus, post your team photo, research it and explain it to your group.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg width="46" height="34" viewBox="0 0 46 34" aria-hidden="true"><rect x="9" y="1" width="10" height="6" rx="1.5" fill="#a81d15"/><rect x="27" y="1" width="10" height="6" rx="1.5" fill="#a81d15"/><rect x="0" y="6" width="46" height="28" rx="3" fill="#c8261d"/><rect x="0" y="27" width="46" height="7" rx="2" fill="#a81d15"/></svg>
+      <div>
+        <div class="eyebrow">UPSRJ · Tutoring for Immersion</div>
+        <h1>Campus Mission</h1>
+      </div>
+    </div>
+    <div class="toolbar">
+      <nav class="steps" aria-label="Phases">
+        <button class="step" id="st1" disabled>Phase 1 · Map &amp; photo</button>
+        <button class="step" id="st2" disabled>Phase 2 · Building</button>
+        <button class="step" id="st3" disabled>Phase 3 · Explain it</button>
+      </nav>
+      <button class="btn ghost small" id="btnSalir" hidden>Change team</button>
+    </div>
+  </header>
+
+  <div class="banner demo" id="demo" hidden>Demo mode: nothing is sent to your teacher. Everything stays in this browser.</div>
+  <div class="banner" id="aviso" hidden></div>
+
+  <!-- INICIO -->
+  <section id="vInicio" class="inicio">
+    <form class="card form" id="fInicio" novalidate>
+      <div>
+        <div class="eyebrow">Before you start</div>
+        <h2>Enter your team</h2>
+      </div>
+      <p>Your teacher gives your group a code. Each team creates a 4-digit PIN the first time. With the same code, team and PIN you can come back any day this week, from any phone.</p>
+      <div class="field">
+        <label for="inCodigo">Group code</label>
+        <input type="text" id="inCodigo" class="code-in" placeholder="IRC01-K7P3" autocomplete="off" autocapitalize="characters" spellcheck="false" required>
+        <span class="help">Ask your teacher for it.</span>
+      </div>
+      <div class="grupo-ok" id="grupoOk" hidden></div>
+      <div id="pasoEquipo" hidden style="display:flex;flex-direction:column;gap:14px">
+        <div class="field">
+          <label for="inEquipo">Team</label>
+          <select id="inEquipo" required></select>
+          <span class="help" id="ayudaEquipo"></span>
+        </div>
+        <div class="field">
+          <label for="inPin">Team PIN (4 digits)</label>
+          <input type="password" id="inPin" class="pin-in" inputmode="numeric" pattern="\d{4}" maxlength="4" autocomplete="off" required>
+          <span class="help" id="ayudaPin">First time: create a PIN and share it only with your team.</span>
+        </div>
+        <div class="field" id="campoIntegrantes">
+          <label for="inIntegrantes">Team members</label>
+          <textarea id="inIntegrantes" placeholder="One full name per line"></textarea>
+        </div>
+      </div>
+      <p class="msg bad" id="errInicio" hidden></p>
+      <button class="btn" type="submit" id="btnEntrarEquipo">Continue</button>
+    </form>
+    <div class="card">
+      <div class="eyebrow">Mission assignments</div>
+      <h2 style="margin-bottom:12px">10 teams, 6 places</h2>
+      <div class="equipos" id="listaEquipos"></div>
+    </div>
+  </section>
+
+  <!-- FASE 1 -->
+  <section id="vMision" class="mision" hidden>
+    <div class="mapWrap">
+      <div id="mapaBox"></div>
+      <div class="mapHud">
+        <span class="chip" id="chipIntentos">Attempts: 0</span>
+        <a class="chip" target="_blank" rel="noopener" href="https://earth.google.com/web/@20.842761,-100.434183,2100a,700d,35y,0h,45t,0r">View in Google Earth ↗</a>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="card">
+        <div class="mission-head">
+          <div class="badge" id="mBadge">1</div>
+          <div><div class="eyebrow" id="mGrupo">Group</div><h2 id="mTitulo">Team</h2></div>
+        </div>
+        <p style="margin-top:12px">Your destination: <b id="mLugar">—</b></p>
+        <div class="areas" id="mAreas" style="margin-top:10px"></div>
+      </div>
+      <div class="task" id="t1">
+        <div class="num">1</div>
+        <div class="task-body">
+          <h3>Find it on the map</h3>
+          <p>Tap the structure you think is your destination. Names are hidden, so you have to recognize it from above.</p>
+          <p class="msg" id="t1msg" hidden></p>
+        </div>
+      </div>
+      <div class="task" id="t2">
+        <div class="num">2</div>
+        <div class="task-body">
+          <h3>Go there and take a photo</h3>
+          <p>Walk to the place. The photo must show the whole team with the building or the area sign behind you.</p>
+          <label class="drop" id="drop" for="inFoto">
+            <input type="file" id="inFoto" accept="image/*">
+            <b>Upload team photo</b>
+            <span class="eyebrow">From your camera or gallery</span>
+          </label>
+          <img class="foto" id="fotoPrev" alt="Team photo on site" hidden>
+          <p class="msg" id="t2msg" hidden></p>
+          <button class="btn" id="btnEdificio" disabled>Enter the building</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FASE 2 -->
+  <section id="vEdificio" class="edificio" hidden>
+    <div class="sticky">
+      <div class="stage" id="stage">
+        <div class="cap"><span class="eyebrow" style="background:rgba(255,255,255,.85);color:#3a4656;padding:3px 8px;border-radius:6px;align-self:flex-start">Phase 2</span><h2 id="eLugar">Building</h2></div>
+        <span class="chip hint">Drag to rotate</span>
+      </div>
+      <div class="card" style="display:flex;flex-direction:column;gap:10px">
+        <div class="eyebrow">Your research stops</div>
+        <div class="areas" id="eAreas"></div>
+        <div class="toolbar"><button class="btn ghost small" id="btnMapa">Back to map</button></div>
+      </div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:16px">
+      <div class="mission-head">
+        <div class="badge" id="eBadge">1</div>
+        <div><div class="eyebrow" id="eGrupo">Group</div><h2 id="eTitulo">Team</h2></div>
+      </div>
+      <p>You have all week. Research on site, ask the staff directly and write in your own words. Answers save automatically, and you can come back with your PIN.</p>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="progress"><i id="prog"></i></div>
+        <div class="retry"><span class="save" id="saveState">No changes</span><button class="btn ghost small" id="btnReintentar" hidden>Try again</button></div>
+      </div>
+      <div class="qs" id="qs"></div>
+      <button class="btn" id="btnIrF3">Go to Phase 3</button>
+    </div>
+  </section>
+
+  <!-- FASE 3 -->
+  <section id="vFase3" hidden>
+    <div class="card lock" id="f3Cerrada">
+      <div class="eyebrow">Phase 3 · Explain it</div>
+      <h2>Phase 3 is not open yet</h2>
+      <p>Your teacher opens Phase 3 when your group finishes collecting information. Keep working on Phase 2 until then.</p>
+      <button class="btn ghost" id="btnRevisarF3">Check again</button>
+    </div>
+    <div class="f3-grid" id="f3Abierta" hidden>
+      <form class="card form no-print" id="fExplica" novalidate>
+        <div class="mission-head">
+          <div class="badge" id="xBadge">1</div>
+          <div><div class="eyebrow" id="xLugar">Place</div><h2>Explain what you found</h2></div>
+        </div>
+        <p>Use your Phase 2 notes. Your group will read this to build a mind map of the whole campus, so write clearly and in English.</p>
+        <div class="qs" id="xs"></div>
+        <div class="retry"><span class="save" id="saveState3">No changes</span></div>
+        <button class="btn" type="submit" id="btnEnviarX">Share with my group</button>
+        <p class="msg" id="xMsg" hidden></p>
+      </form>
+      <div class="card" style="display:flex;flex-direction:column;gap:16px">
+        <div>
+          <div class="eyebrow" id="gNombre">Group</div>
+          <h2>Your group's campus</h2>
+        </div>
+        <p class="no-print">This is what every team found. Download it and build your mind map: center = the campus, branches = places, sub-branches = teams and facts.</p>
+        <div class="downloads no-print">
+          <button class="btn small" id="dlMd">Mind map outline (.md)</button>
+          <button class="btn ghost small" id="dlOpml">XMind / MindMeister (.opml)</button>
+          <button class="btn ghost small" id="dlTxt">Copy as text</button>
+          <button class="btn ghost small" id="dlPdf">Print / PDF</button>
+          <button class="btn ghost small" id="btnRecargar">Refresh</button>
+        </div>
+        <p class="msg" id="dlMsg" hidden></p>
+        <div id="grupoMapa" style="display:flex;flex-direction:column;gap:14px"><p class="empty">Loading your group…</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MURO -->
+  <section class="card no-print" id="vMuro" hidden style="display:flex;flex-direction:column;gap:14px">
+    <div><div class="eyebrow" id="muroGrupo">Group</div><h2>Arrivals wall</h2></div>
+    <div class="muro" id="muro"><p class="empty">No team has arrived yet. The first photo will show up here.</p></div>
+  </section>
+</div>
+<div id="flash"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script src="data.js"></script>
+<script src="campus.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
