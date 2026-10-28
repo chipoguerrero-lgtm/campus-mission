@@ -15,7 +15,7 @@ const LUGARES = {
   lombricomposta: {nombre:'Vermicompost', pista:'It is on the east edge of campus, just past the Warehouse & Sustainability Cabin.'},
   bebederos: {nombre:'Wildlife water stations', pista:'They are on the far west edge of campus, in the tree line beside the lower parking lot.'}
 };
-const COL = ['#c8261d','#1f5fbf','#e0a21b','#2f8a3e','#7a3fb0','#d4572a','#118a8a','#8a5a2b','#b02f6b','#3d4b5c'];
+const COL = ['#031926','#468189','#2f6f66','#1d4552','#3c7a8a','#245a5f','#0f2e3c','#4d7f73','#2a5361','#5a7f86'];
 const EQUIPOS = [
   {n:1, lugar:'learning', titulo:'Animation and Visual Effects Engineering Academy', areas:['Animation and Visual Effects Academy'],
    extra:['Which labs, specialized equipment or software does the program use?','Which projects or events of the program can students from other programs visit?']},
@@ -74,7 +74,7 @@ const CONSTRUCCIONES = [
 ];
 
 /* Modelos 3D estilo Lego (unidad = 1 stud) */
-const C3 = {green:0x2f8a3e,blue:0x1f5fbf,terra:0xb4563f,brown:0x8a4b2f,white:0xf1f2f0,lgrey:0xc9ced3,grey:0x8b939b,red:0xc8261d,wood:0x9c6b3c,orange:0xe07a2e,leaf:0x5aa04a,glass:0x7fb8e6,panel:0x1d2f55,plate:0x4f9446,yellow:0xf2c230};
+const C3 = {green:0x2f8a3e,blue:0x1f5fbf,terra:0xb4563f,brown:0x8a4b2f,white:0xf1f2f0,lgrey:0xc9ced3,grey:0x8b939b,red:0xc8261d,wood:0x9c6b3c,orange:0xe07a2e,leaf:0x5aa04a,glass:0x7fb8e6,panel:0x1d2f55,plate:0x77aca2,yellow:0xf2c230};
 const MODELOS = {
   edificio1:[{x:0,z:0,w:16,d:6,h:5,c:'terra',win:true,panels:true},{x:-2,z:1,w:2,d:4,h:4,c:'terra',win:true},{x:16,z:1,w:3,d:4,h:3,c:'lgrey'}],
   learning:[{x:0,z:0,w:10,d:8,h:5,c:'grey',win:true,panels:true},{x:10,z:2,w:3,d:5,h:4,c:'terra',win:true}],

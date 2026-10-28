@@ -5,20 +5,21 @@ img{max-width:100%}
 [hidden]{display:none!important}
 /* Layout: maqueta de bloques. Fase 1 = mapa como placa Lego + panel de misión; Fase 2 = edificio 3D + cuaderno de campo. */
 :root{
-  --bg:#e9edf2; --surface:#ffffff; --surface-2:#f4f6f9; --ink:#17202b; --muted:#566273; --line:#d0d7e0;
-  --red:#c8261d; --red-ink:#ffffff; --yellow:#f2c230; --blue:#1f5fbf; --ok:#2f8a3e; --warn:#b5651d;
+  /* Gama: Rich Black #031926 · Metallic Seaweed #468189 · Green Sheen #77ACA2 · Opal #9DBEBB · Champagne #F4E9CD */
+  --bg:#F4E9CD; --surface:#fffbf1; --surface-2:#f8f0dc; --ink:#031926; --muted:#2f5d63; --line:#cfd9d3;
+  --red:#3c6f77; --red-ink:#ffffff; --yellow:#77ACA2; --blue:#468189; --ok:#2f6f66; --warn:#9a4a24;
   --display:"Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
   --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
   --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
   /* El mapa es un objeto físico: mismos colores en ambos temas */
-  --m-plate:#4f9446; --m-field:#86ad5f; --m-field2:#76a052; --m-road:#8e959c; --m-gravel:#bdb5a6; --m-path:#e1d3ac; --m-tree:#2c6431; --m-tree2:#3d7d3c;
+  --m-plate:#77ACA2; --m-field:#9DBEBB; --m-field2:#8fb5ad; --m-road:#7d8f94; --m-gravel:#c9cdbf; --m-path:#F4E9CD; --m-tree:#2f5d63; --m-tree2:#468189;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0f141b; --surface:#18202a; --surface-2:#1f2935; --ink:#e7ecf2; --muted:#9aa6b6; --line:#2c3746;
-  --red:#e2463b; --red-ink:#ffffff; --yellow:#f5cd4a; --blue:#6a9ff0; --ok:#5cbf6c; --warn:#e39a4f; color-scheme:dark }}
+  --bg:#031926; --surface:#0a2533; --surface-2:#10303f; --ink:#F4E9CD; --muted:#9DBEBB; --line:#1f4552;
+  --red:#77ACA2; --red-ink:#031926; --yellow:#9DBEBB; --blue:#9DBEBB; --ok:#77ACA2; --warn:#e3a46f; color-scheme:dark }}
 :root[data-theme="dark"]{
-  --bg:#0f141b; --surface:#18202a; --surface-2:#1f2935; --ink:#e7ecf2; --muted:#9aa6b6; --line:#2c3746;
-  --red:#e2463b; --red-ink:#ffffff; --yellow:#f5cd4a; --blue:#6a9ff0; --ok:#5cbf6c; --warn:#e39a4f; color-scheme:dark }
+  --bg:#031926; --surface:#0a2533; --surface-2:#10303f; --ink:#F4E9CD; --muted:#9DBEBB; --line:#1f4552;
+  --red:#77ACA2; --red-ink:#031926; --yellow:#9DBEBB; --blue:#9DBEBB; --ok:#77ACA2; --warn:#e3a46f; color-scheme:dark }
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
 .app{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 48px;display:flex;flex-direction:column;gap:20px}
@@ -67,7 +68,7 @@ textarea{resize:vertical;min-height:84px}
 
 /* Misión */
 .mision{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:20px;align-items:start}
-.mapWrap{position:relative;background:#3f7f39;border-radius:18px;overflow:hidden;border:4px solid #2e5f2a;box-shadow:0 6px 0 #24491f}
+.mapWrap{position:relative;background:#77ACA2;border-radius:18px;overflow:hidden;border:4px solid #468189;box-shadow:0 6px 0 #031926}
 #mapa{display:block;width:100%;height:min(80vh,1000px)}
 .mapHud{position:absolute;left:10px;right:10px;bottom:10px;display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;pointer-events:none}
 .mapHud > *{pointer-events:auto}
@@ -103,9 +104,9 @@ textarea{resize:vertical;min-height:84px}
 
 /* Edificio */
 .edificio{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
-.stage{position:relative;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#bfe0f5,#e8f3fa 70%);border:1px solid var(--line);aspect-ratio:4/3.3;max-width:100%}
-:root[data-theme="dark"] .stage{background:linear-gradient(180deg,#1c2c3d,#2a3b4d 70%)}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .stage{background:linear-gradient(180deg,#1c2c3d,#2a3b4d 70%)}}
+.stage{position:relative;border-radius:18px;overflow:hidden;background:linear-gradient(180deg,#9DBEBB,#F4E9CD 75%);border:1px solid var(--line);aspect-ratio:4/3.3;max-width:100%}
+:root[data-theme="dark"] .stage{background:linear-gradient(180deg,#0a2533,#10303f 70%)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .stage{background:linear-gradient(180deg,#0a2533,#10303f 70%)}}
 .stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
 .stage .cap{position:absolute;left:12px;top:12px;display:flex;flex-direction:column;gap:4px}
 .stage .cap h2{color:#14202e;background:rgba(255,255,255,.85);padding:6px 10px;border-radius:8px;font-size:1.1rem}
@@ -245,3 +246,9 @@ button.step[disabled]{cursor:not-allowed;opacity:.55}
 .lv details summary{font-size:1rem}
 .lv .muro{grid-template-columns:repeat(auto-fill,minmax(min(14em,100%),1fr))}
 .lv #flash{display:none}
+/* Anillo para que las insignias oscuras se vean en el tema oscuro */
+.badge,.eq .n{box-shadow:inset 0 -3px 0 rgba(0,0,0,.2),0 0 0 2px var(--line)}
+.step.on{border-color:var(--red);color:var(--red)}
+/* Baja visión conserva el mapa original */
+:root.lv{--m-plate:#4f9446;--m-field:#86ad5f;--m-field2:#76a052;--m-road:#8e959c;--m-gravel:#bdb5a6;--m-path:#e1d3ac;--m-tree:#2c6431;--m-tree2:#3d7d3c}
+.lv .mapWrap{background:#3f7f39}
