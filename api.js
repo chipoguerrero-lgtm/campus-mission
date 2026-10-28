@@ -79,6 +79,8 @@
           s.grupos[codigo] = { codigo, nombre: q.nombre, fase3: false, creado: now }; grabar(s); r = { ok: true, codigo, nombre: q.nombre };
         } else if (q.op === 'fase3') { const gg = s.grupos[norm(q.codigo)]; if (gg) { gg.fase3 = !!q.abierta; grabar(s); r = { ok: true }; } else r = { ok: false, error: 'group_not_found' }; }
         else if (q.op === 'equipos') { const gg = s.grupos[norm(q.codigo)]; r = gg ? { ok: true, grupo: gg, equipos: Object.values(s.equipos).filter(e => e.codigo === gg.codigo).map(e => Object.assign(pub(e, gg), { fotoUrl: '' })) } : { ok: false, error: 'group_not_found' }; }
+        else if (q.op === 'eliminarEquipo') { const k = norm(q.codigo) + '|' + Number(q.equipo); if (s.equipos[k]) { delete s.equipos[k]; grabar(s); r = { ok: true }; } else r = { ok: false, error: 'team_not_found' }; }
+        else if (q.op === 'eliminarGrupo') { const c = norm(q.codigo); if (!s.grupos[c]) r = { ok: false, error: 'group_not_found' }; else if (norm(q.confirmar) !== c) r = { ok: false, error: 'confirm_mismatch' }; else { let n = 0; Object.keys(s.equipos).forEach(k => { if (s.equipos[k].codigo === c) { delete s.equipos[k]; n++; } }); delete s.grupos[c]; grabar(s); r = { ok: true, equiposArchivados: n }; } }
         else if (q.op === 'reiniciarPin') { const tt = s.equipos[norm(q.codigo) + '|' + Number(q.equipo)]; if (tt) { tt.pin = String(q.pin); grabar(s); r = { ok: true }; } else r = { ok: false, error: 'team_not_found' }; }
         else r = { ok: false, error: 'unknown_op' };
         break;

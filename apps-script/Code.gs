@@ -265,5 +265,46 @@ function docente_(q) {
     t.pinHash = hash_(g.codigo, Number(q.equipo), q.pin); t.actualizado = ahora_(); escribirEquipo_(t);
     return { ok: true };
   }
+  if (q.op === 'eliminarEquipo') {
+    const g = grupo_(q.codigo); if (!g) return { ok: false, error: 'group_not_found' };
+    const t = equipo_(g.codigo, q.equipo); if (!t) return { ok: false, error: 'team_not_found' };
+    archivarEquipos_([t], 'Equipo eliminado');
+    return { ok: true };
+  }
+  if (q.op === 'eliminarGrupo') {
+    const g = grupo_(q.codigo); if (!g) return { ok: false, error: 'group_not_found' };
+    if (norm_(q.confirmar) !== g.codigo) return { ok: false, error: 'confirm_mismatch' };
+    const eqs = equipos_().filter(function(t){ return t.codigo === g.codigo; });
+    archivarEquipos_(eqs, 'Grupo eliminado');
+    const sh = hoja_('Grupos');
+    archivo_('Grupos eliminados', ['Eliminado en', 'Código', 'Nombre del grupo', 'Fase 3 abierta', 'Creado'])
+      .appendRow([ahora_(), g.codigo, g.nombre, g.fase3, g.creado]);
+    sh.deleteRow(g.fila);
+    // La carpeta de fotos del grupo se conserva, solo se renombra
+    const raiz = DriveApp.getFolderById(PropertiesService.getScriptProperties().getProperty('FOTOS_ID'));
+    const it = raiz.getFoldersByName(g.nombre);
+    if (it.hasNext() && !grupos_().some(function(x){ return x.nombre === g.nombre; })) it.next().setName(g.nombre + ' (eliminado ' + ahora_().slice(0, 10) + ')');
+    return { ok: true, equiposArchivados: eqs.length };
+  }
   return { ok: false, error: 'unknown_op' };
+}
+
+/* ---------------- eliminar sin perder datos ----------------
+   Las filas pasan a pestañas de archivo ("Eliminados", "Grupos eliminados")
+   y las fotos se quedan en Drive con "(eliminado)" en el nombre. */
+function archivo_(nombre, encabezados) {
+  const ss = ss_(); let sh = ss.getSheetByName(nombre);
+  if (!sh) { sh = ss.insertSheet(nombre); sh.appendRow(encabezados); sh.setFrozenRows(1); }
+  return sh;
+}
+function archivarEquipos_(lista, motivo) {
+  if (!lista.length) return;
+  const arch = archivo_('Eliminados', ['Eliminado en', 'Motivo'].concat(COLS_EQUIPOS.map(function(c){ return ENCABEZADOS_LEGIBLES[c] || c; })));
+  const sh = hoja_('Equipos');
+  lista.slice().sort(function(a, b){ return b._fila - a._fila; }).forEach(function(t) {
+    arch.appendRow([ahora_(), motivo].concat(COLS_EQUIPOS.map(function(c){ return c === 'pinHash' ? '' : (t[c] === undefined ? '' : t[c]); })));
+    if (t.fotoId) { try { const f = DriveApp.getFileById(String(t.fotoId)); f.setName(f.getName().replace(/\.jpg$/i, '') + ' (eliminado).jpg'); } catch (e) {} }
+    const m = mini_(t.clave); if (m) hoja_('Miniaturas').deleteRow(m.fila);
+    sh.deleteRow(t._fila);
+  });
 }

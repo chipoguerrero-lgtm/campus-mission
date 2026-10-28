@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex">
 <title>Campus Mission · Panel docente</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
-<link rel="stylesheet" href="styles.css?v=4">
+<link rel="stylesheet" href="styles.css?v=5">
 <style>
 .gcard{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;align-items:center;padding:14px 16px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer}
 .gcard.sel{border-color:var(--red);box-shadow:0 3px 0 var(--red)}
@@ -17,6 +17,9 @@
 .cols{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:20px;align-items:start}
 .list{display:flex;flex-direction:column;gap:10px}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.zona-peligro{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:14px 16px;border-radius:14px;border:1.5px dashed var(--warn)}
+.btn.peligro{background:var(--warn);color:#fff}
+.confirma{padding:10px 12px;border-radius:10px;border:1.5px solid var(--warn);font-size:.9rem}
 @media (max-width:860px){.cols{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
@@ -71,14 +74,24 @@
       </div>
       <p class="muted" id="ayudaF3" hidden style="color:var(--muted)">Abre la fase 3 cuando el grupo termine su semana de recolección. Los equipos verán y podrán descargar lo que encontró todo el grupo.</p>
       <div class="doc-grid" id="equipos"><p class="empty">Elige un grupo para ver a sus equipos.</p></div>
+      <div class="zona-peligro" id="zonaEliminar" hidden>
+        <div><b>Eliminar este grupo</b><p class="save">El grupo y sus equipos desaparecen de la página y del panel. Sus datos pasan a las pestañas «Eliminados» y «Grupos eliminados» de tu hoja, y las fotos se quedan en Drive.</p></div>
+        <button class="btn ghost small" type="button" id="btnElimGrupo">Eliminar grupo…</button>
+        <div class="row" id="confGrupo" hidden>
+          <label for="inConfGrupo" class="save">Para confirmar, escribe el código <b id="codConf"></b></label>
+          <input type="text" id="inConfGrupo" autocomplete="off" autocapitalize="characters" style="max-width:16ch">
+          <button class="btn small peligro" type="button" id="btnElimGrupoOk" disabled>Eliminar grupo</button>
+          <button class="btn ghost small" type="button" id="btnElimGrupoNo">Cancelar</button>
+        </div>
+      </div>
     </div>
   </div>
   <footer class="pie"><span class="save">Campus Mission · UPSRJ · Tutoring for Immersion</span><img class="firma" src="assets/firma_designed_by_chipo.png" alt="Designed and built by Chipo"></footer>
 </div>
 
-<script src="config.js?v=4"></script>
-<script src="api.js?v=4"></script>
-<script src="data.js?v=4"></script>
+<script src="config.js?v=5"></script>
+<script src="api.js?v=5"></script>
+<script src="data.js?v=5"></script>
 <script>
 const API = window.CampusAPI;
 let PIN = null, SEL = null;
@@ -123,6 +136,7 @@ async function verGrupo(codigo) {
   if (!r.ok) { $('#equipos').innerHTML = '<p class="empty">No se pudieron cargar (' + esc(r.error) + ').</p>'; return; }
   $('#selCodigo').textContent = r.grupo.codigo; $('#selNombre').textContent = r.grupo.nombre;
   $('#swFase3').hidden = false; $('#ayudaF3').hidden = false; $('#chkFase3').checked = !!r.grupo.fase3;
+  $('#zonaEliminar').hidden = false; $('#confGrupo').hidden = true; $('#inConfGrupo').value = ''; $('#btnElimGrupoOk').disabled = true; $('#codConf').textContent = r.grupo.codigo;
   $('#equipos').innerHTML = EQUIPOS.map(eq => {
     const d = r.equipos.find(x => x.equipo === eq.n);
     if (!d) return `<div class="doc-card"><div class="row"><div class="badge" style="--c:${eq.color};width:40px;height:40px;font-size:1.1rem">${eq.n}</div><div><b>${esc(eq.titulo)}</b><div class="pills"><span class="pill no">Sin registro</span></div></div></div></div>`;
@@ -140,7 +154,8 @@ async function verGrupo(codigo) {
       ${d.integrantes ? `<p style="font-size:.85rem;color:var(--muted);white-space:pre-wrap;margin:0">${esc(d.integrantes)}</p>` : ''}
       <details><summary>Respuestas de la fase 2</summary><dl class="ans">${qs.map(([id, , t]) => `<dt>${esc(t)}</dt><dd>${esc(d.respuestas[id] || '—')}</dd>`).join('')}</dl></details>
       <details><summary>Explicación de la fase 3</summary><dl class="ans">${EXPLICACION.map(([id, tag]) => `<dt>${esc(tag)}</dt><dd>${esc(x[id] || '—')}</dd>`).join('')}</dl></details>
-      <div class="row">${d.fotoUrl ? `<a class="link" href="${esc(d.fotoUrl)}" target="_blank" rel="noopener">Foto completa ↗</a>` : ''}<button class="btn ghost small" data-pin="${eq.n}">Reiniciar PIN</button><span class="save">Última modificación: ${hora(d.actualizado)}</span></div>
+      <div class="row">${d.fotoUrl ? `<a class="link" href="${esc(d.fotoUrl)}" target="_blank" rel="noopener">Foto completa ↗</a>` : ''}<button class="btn ghost small" data-pin="${eq.n}">Reiniciar PIN</button><button class="btn ghost small" data-del="${eq.n}">Eliminar equipo</button><span class="save">Última modificación: ${hora(d.actualizado)}</span></div>
+      <div class="row confirma" data-delbox="${eq.n}" hidden><span>¿Eliminar al equipo ${eq.n}? Se borra su avance de la página (queda copia en la pestaña «Eliminados»).</span><button class="btn small peligro" data-delok="${eq.n}">Sí, eliminar</button><button class="btn ghost small" data-delno="${eq.n}">Cancelar</button></div>
       <div class="row" data-pinbox="${eq.n}" hidden><input type="text" inputmode="numeric" maxlength="4" placeholder="Nuevo PIN" style="max-width:9ch" id="np-${eq.n}"><button class="btn small" data-pinok="${eq.n}">Guardar PIN</button></div>
     </div>`;
   }).join('');
@@ -151,7 +166,29 @@ async function verGrupo(codigo) {
     const r2 = await doc('reiniciarPin', { codigo: SEL, equipo: +n, pin });
     aviso(r2.ok ? `PIN del equipo ${n} cambiado. Díselo al equipo.` : 'No se pudo cambiar (' + r2.error + ').');
   }));
+  document.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => { document.querySelector(`[data-delbox="${b.dataset.del}"]`).hidden = false; }));
+  document.querySelectorAll('[data-delno]').forEach(b => b.addEventListener('click', () => { document.querySelector(`[data-delbox="${b.dataset.delno}"]`).hidden = true; }));
+  document.querySelectorAll('[data-delok]').forEach(b => b.addEventListener('click', async () => {
+    b.disabled = true; const n = +b.dataset.delok;
+    const r3 = await doc('eliminarEquipo', { codigo: SEL, equipo: n });
+    aviso(r3.ok ? `Equipo ${n} eliminado. Puede volver a registrarse con un PIN nuevo.` : 'No se pudo eliminar (' + r3.error + ').');
+    const g = await doc('grupos'); if (g.ok) pintarGrupos(g.grupos);
+    verGrupo(SEL);
+  }));
 }
+$('#btnElimGrupo').addEventListener('click', () => { $('#confGrupo').hidden = false; $('#inConfGrupo').focus(); });
+$('#btnElimGrupoNo').addEventListener('click', () => { $('#confGrupo').hidden = true; $('#inConfGrupo').value = ''; });
+$('#inConfGrupo').addEventListener('input', e => { $('#btnElimGrupoOk').disabled = e.target.value.trim().toUpperCase() !== SEL; });
+$('#btnElimGrupoOk').addEventListener('click', async () => {
+  $('#btnElimGrupoOk').disabled = true;
+  const r = await doc('eliminarGrupo', { codigo: SEL, confirmar: $('#inConfGrupo').value.trim() });
+  if (!r.ok) { aviso('No se pudo eliminar (' + r.error + ').'); return; }
+  aviso(`Grupo ${SEL} eliminado. ${r.equiposArchivados} equipo(s) pasaron a la pestaña «Eliminados».`);
+  SEL = null; $('#zonaEliminar').hidden = true; $('#swFase3').hidden = true; $('#ayudaF3').hidden = true;
+  $('#selCodigo').textContent = 'Elige un grupo'; $('#selNombre').textContent = 'Equipos';
+  $('#equipos').innerHTML = '<p class="empty">Elige un grupo para ver a sus equipos.</p>';
+  const g = await doc('grupos'); if (g.ok) pintarGrupos(g.grupos);
+});
 $('#chkFase3').addEventListener('change', async e => {
   const abierta = e.target.checked;
   const r = await doc('fase3', { codigo: SEL, abierta });
